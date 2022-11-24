@@ -1,0 +1,4 @@
+use("mongogram")
+
+db.messages.findOne({$expr: {$gt: [{$strLenCP: "$rawText"}, 1]}})
+

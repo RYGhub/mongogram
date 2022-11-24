@@ -1,0 +1,89 @@
+use("mongogram")
+
+/*
+db.messages.updateMany(
+    {
+        date_unixtime: {$exists: true}
+    },
+    [
+        {$set: {
+            date_unixtime_proper: {$toLong: "$date_unixtime"},
+        }},
+        {$set: {
+            date_unixtime_proper: {$multiply: ["$date_unixtime_proper", 1000]},
+        }},
+        {$set: {
+            date: {$toDate: "$date_unixtime_proper"}
+        }},
+        {$unset: [
+            "date_unixtime",
+            "date_unixtime_proper"
+        ]}
+    ]
+)
+
+db.messages.updateMany(
+    {
+        from: {$exists: true}
+    },
+    [
+        {$set: {
+            actor: "$from"
+        }},
+        {$unset: [
+            "from",
+        ]}
+    ]
+)
+
+db.messages.updateMany(
+    {
+        from_id: {$exists: true}
+    },
+    [
+        {$set: {
+            actor_id: "$from_id"
+        }},
+        {$unset: [
+            "from_id",
+        ]}
+    ]
+)
+*/
+
+db.messages.updateMany(
+    {
+        text: {$type: "array"},
+    },
+    [
+        {$set: {
+            rawText: {
+                $reduce: {
+                    input: "$text",
+                    initialValue: "",
+                    in: {$concat: [
+                        "$$value",
+                        {$cond: {
+                            if: {$eq: [{$type: "$$this"}, "object"]},
+                            then: "$$this.text",
+                            else: "$$this",
+                        }},
+                    ]}
+                }
+            }
+        }},
+    ]
+)
+
+/*
+db.messages.updateMany(
+    {
+        text: {$type: "string"},
+    },
+    [
+        {$set: {
+            rawText: "$text",
+        }},
+    ]
+)
+*/

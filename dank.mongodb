@@ -1,0 +1,42 @@
+use("mongogram")
+
+db.messages.aggregate([
+    {$match: {
+        actor: {$exists: true},
+        rawText: {
+            $type: "string",
+        },
+    }},
+    {$match: {$expr: {
+        $regexMatch: {
+            input: "$rawText",
+            regex: /d+a+n+k+/i,
+        }
+    }}},
+    {$group: {
+        _id: "$actor",
+        dankCount: {$sum: 1},
+        onTimeCount: {$sum: {$cond: {
+            if: {$and: [
+                {$or: [
+                    {$eq: [{$hour: "$date"}, 2]},
+                    {$eq: [{$hour: "$date"}, 3]},
+                    {$eq: [{$hour: "$date"}, 14]},
+                    {$eq: [{$hour: "$date"}, 15]}
+                ]},
+                {$eq: [{$minute: "$date"}, 20]},
+            ]},
+            then: 1,
+            else: 0,
+        }}},
+    }},
+    {$match: {
+        dankCount: {$gte: 1},
+    }},
+    {$set: {
+        onTimePct: {$multiply: [{$divide: ["$onTimeCount", "$dankCount"]}, 100]},
+    }},
+    {$sort: {
+        onTimeCount: -1,
+    }},
+])

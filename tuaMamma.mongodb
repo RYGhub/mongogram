@@ -1,0 +1,31 @@
+use("mongogram")
+
+config.set("displayBatchSize", 100)
+
+db.messages.aggregate([
+    {$match: {
+        actor: {$exists: true},
+        rawText: {$type: "string"}
+    }},
+    {$group: {
+        _id: "$actor",
+        msgCount: {$sum: 1},
+        momCount: {$sum: {$cond: {
+            if: {$regexMatch: {
+                input: "$rawText",
+                regex: /(?:(?:la|le|tua|tue|sua|sue|vostra|vostre|loro)\s*(?:mamma|mamme|madre|madri)|(?:your|ur)\s*(?:mom|mummy|mother))/i,
+            }},
+            then: 1,
+            else: 0,
+        }}},
+    }},
+    {$match: {
+        momCount: {$gte: 1},
+    }},
+    {$set: {
+        momPct: {$multiply: [{$divide: ["$momCount", "$msgCount"]}, 100]},
+    }},
+    {$sort: {
+        momPct: -1,
+    }},
+])

@@ -1,0 +1,42 @@
+use("mongogram")
+
+db.messages.createIndex(
+    {
+        actor_id: 1
+    },
+    {
+        name: "index_actor_id"
+    }
+)
+db.messages.createIndex(
+    {
+        actor: 1
+    },
+    {
+        name: "index_actor"
+    }
+)
+db.messages.createIndex(
+    {
+        date: 1
+    },
+    {
+        name: "index_date"
+    }
+)
+db.messages.createIndex(
+    {
+        type: 1
+    },
+    {
+        name: "index_type"
+    }
+)
+db.messages.createIndex(
+    {
+        text: "text"
+    },
+    {
+        name: "index_text"
+    }
+)
