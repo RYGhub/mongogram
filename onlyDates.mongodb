@@ -1,0 +1,11 @@
+use("mongogram");
+
+db.messages.aggregate([
+    {$match: {
+        date: {$exists: true},
+    }},
+    {$project: {
+        _id: 0,
+        date: 1,
+    }}
+]).map(o => + o.date / 1000)
